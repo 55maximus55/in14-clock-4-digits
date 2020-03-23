@@ -11,7 +11,7 @@ GButton button_set(pin_button_set);
 GButton button_up(pin_button_up);
 GButton button_next(pin_button_next);
 
-int pin_digits[] = {2, 3, 4, 5};
+int pin_digits[] = {5, 4, 3, 2};
 int pin_a0 = A0;
 int pin_a1 = A1;
 int pin_a2 = A2;
@@ -21,7 +21,7 @@ int pin_point_right = 12;
 
 MicroDS3231 rtc;
 
-void setDigit(bool d0, bool d1, bool d2, bool d3) {
+void setDigitBool(bool d0, bool d1, bool d2, bool d3) {
     if (d0)
         digitalWrite(A0, HIGH);
     else
@@ -43,37 +43,37 @@ void setDigit(int d) {
     switch (d)
     {
     case 0:
-        setDigit(1, 1, 0, 0);
+        setDigitBool(1, 1, 0, 0);
         break;
     case 1:
-        setDigit(0, 0, 1, 0);
+        setDigitBool(0, 0, 1, 0);
         break;
     case 2:
-        setDigit(1, 0, 1, 0);
+        setDigitBool(1, 0, 1, 0);
         break;
     case 3:
-        setDigit(1, 0, 1, 1);
+        setDigitBool(1, 0, 1, 1);
         break;
     case 4:
-        setDigit(0, 0, 1, 1);
+        setDigitBool(0, 0, 1, 1);
         break;
     case 5:
-        setDigit(0, 0, 0, 1);
+        setDigitBool(0, 0, 0, 1);
         break;
     case 6:
-        setDigit(1, 0, 0, 1);
+        setDigitBool(1, 0, 0, 1);
         break;
     case 7:
-        setDigit(1, 0, 0, 0);
+        setDigitBool(1, 0, 0, 0);
         break;
     case 8:
-        setDigit(0, 0, 0, 0);
+        setDigitBool(0, 0, 0, 0);
         break;
     case 9:
-        setDigit(0, 1, 0, 0);
+        setDigitBool(0, 1, 0, 0);
         break;
     default:
-        setDigit(1, 1, 1, 1);
+        setDigitBool(1, 1, 1, 1);
         break;
     }
 }
@@ -83,9 +83,26 @@ void setPoint(bool left, bool state) {
     digitalWrite(point_pin, level);
 }
 
+void turnLamp(int n, int digit, bool left_point, bool right_point) {
+    int lamp = pin_digits[n];
+
+    digitalWrite(lamp, HIGH);
+    setDigit(digit);
+    delay(1);
+    setDigit(-1);
+    setPoint(false, left_point);
+    delay(1);
+    setPoint(false, false);
+    setPoint(true, right_point);
+    delay(1);
+    setPoint(true, false);
+    digitalWrite(lamp, LOW);
+}
+
 void setup() {
     for (int i = 0; i < 4; i++) {
         pinMode(pin_digits[i], OUTPUT);
+        digitalWrite(pin_digits[i], LOW);
     }
     pinMode(A0, OUTPUT);
     pinMode(A1, OUTPUT);
@@ -93,25 +110,32 @@ void setup() {
     pinMode(A3, OUTPUT);
     pinMode(pin_point_left, OUTPUT);
     pinMode(pin_point_right, OUTPUT);
+
+    digitalWrite(A0, LOW);
+    digitalWrite(A1, LOW);
+    digitalWrite(A2, LOW);
+    digitalWrite(A3, LOW);
+    digitalWrite(pin_point_left, LOW);
+    digitalWrite(pin_point_right, LOW);
     
     // кнопки
-    button1.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button1.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button1.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
-    button1.setType(HIGH_PULL);
-    button1.setDirection(NORM_OPEN);
+    button_set.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
+    button_set.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
+    button_set.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button_set.setType(HIGH_PULL);
+    button_set.setDirection(NORM_OPEN);
 
-    button2.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button2.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button2.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
-    button2.setType(HIGH_PULL);
-    button2.setDirection(NORM_OPEN);
+    button_up.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
+    button_up.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
+    button_up.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button_up.setType(HIGH_PULL);
+    button_up.setDirection(NORM_OPEN);
 
-    button3.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button3.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button3.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
-    button3.setType(HIGH_PULL);
-    button3.setDirection(NORM_OPEN);
+    button_next.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
+    button_next.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
+    button_next.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button_next.setType(HIGH_PULL);
+    button_next.setDirection(NORM_OPEN);
 
     if (rtc.lostPower()) {  //  при потере питания
         rtc.setTime(COMPILE_TIME);  // установить время компиляции
@@ -119,5 +143,8 @@ void setup() {
 }
 
 void loop() {
-    
+    turnLamp(0, 1, true, true);
+    turnLamp(1, 3, true, true);
+    turnLamp(2, 3, true, true);
+    turnLamp(3, 7, true, true);
 }
