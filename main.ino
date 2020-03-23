@@ -16,8 +16,8 @@ int pin_a0 = A0;
 int pin_a1 = A1;
 int pin_a2 = A2;
 int pin_a3 = A3;
-int pin_dot_left = 11;
-int pin_dot_right = 12;
+int pin_point_left = 11;
+int pin_point_right = 12;
 
 MicroDS3231 rtc;
 
@@ -29,8 +29,8 @@ void setup() {
     pinMode(A1, OUTPUT);
     pinMode(A2, OUTPUT);
     pinMode(A3, OUTPUT);
-    pinMode(pin_dot_left, OUTPUT);
-    pinMode(pin_dot_right, OUTPUT);
+    pinMode(pin_point_left, OUTPUT);
+    pinMode(pin_point_right, OUTPUT);
     
     // кнопки
     button1.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
@@ -54,6 +54,68 @@ void setup() {
     if (rtc.lostPower()) {  //  при потере питания
         rtc.setTime(COMPILE_TIME);  // установить время компиляции
     }
+}
+
+void setDigit(bool d0, bool d1, bool d2, bool d3) {
+    if (d0)
+        digitalWrite(A0, HIGH);
+    else
+        digitalWrite(A0, LOW);
+    if (d1)
+        digitalWrite(A1, HIGH);
+    else
+        digitalWrite(A1, LOW);
+    if (d2)
+        digitalWrite(A2, HIGH);
+    else
+        digitalWrite(A2, LOW);
+    if (d3)
+        digitalWrite(A3, HIGH);
+    else
+        digitalWrite(A3, LOW);
+}
+void setDigit(int d) {
+    switch (d)
+    {
+    case 0:
+        setDigit(1, 1, 0, 0);
+        break;
+    case 1:
+        setDigit(0, 0, 1, 0);
+        break;
+    case 2:
+        setDigit(1, 0, 1, 0);
+        break;
+    case 3:
+        setDigit(1, 0, 1, 1);
+        break;
+    case 4:
+        setDigit(0, 0, 1, 1);
+        break;
+    case 5:
+        setDigit(0, 0, 0, 1);
+        break;
+    case 6:
+        setDigit(1, 0, 0, 1);
+        break;
+    case 7:
+        setDigit(1, 0, 0, 0);
+        break;
+    case 8:
+        setDigit(0, 0, 0, 0);
+        break;
+    case 9:
+        setDigit(0, 1, 0, 0);
+        break;
+    default:
+        setDigit(1, 1, 1, 1);
+        break;
+    }
+}
+void setPoint(bool left, bool state) {
+    auto level = (state) ? HIGH : LOW;
+    auto point_pin = (left) ? pin_point_left : pin_point_right;
+    digitalWrite(point_pin, level);
 }
 
 void loop() {
