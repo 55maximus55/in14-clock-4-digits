@@ -21,41 +21,6 @@ int pin_point_right = 12;
 
 MicroDS3231 rtc;
 
-void setup() {
-    for (int i = 0; i < 4; i++) {
-        pinMode(pin_digits[i], OUTPUT);
-    }
-    pinMode(A0, OUTPUT);
-    pinMode(A1, OUTPUT);
-    pinMode(A2, OUTPUT);
-    pinMode(A3, OUTPUT);
-    pinMode(pin_point_left, OUTPUT);
-    pinMode(pin_point_right, OUTPUT);
-    
-    // кнопки
-    button1.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button1.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button1.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
-    button1.setType(HIGH_PULL);
-    button1.setDirection(NORM_OPEN);
-
-    button2.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button2.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button2.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
-    button2.setType(HIGH_PULL);
-    button2.setDirection(NORM_OPEN);
-
-    button3.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button3.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button3.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
-    button3.setType(HIGH_PULL);
-    button3.setDirection(NORM_OPEN);
-
-    if (rtc.lostPower()) {  //  при потере питания
-        rtc.setTime(COMPILE_TIME);  // установить время компиляции
-    }
-}
-
 void setDigit(bool d0, bool d1, bool d2, bool d3) {
     if (d0)
         digitalWrite(A0, HIGH);
@@ -116,6 +81,41 @@ void setPoint(bool left, bool state) {
     auto level = (state) ? HIGH : LOW;
     auto point_pin = (left) ? pin_point_left : pin_point_right;
     digitalWrite(point_pin, level);
+}
+
+void setup() {
+    for (int i = 0; i < 4; i++) {
+        pinMode(pin_digits[i], OUTPUT);
+    }
+    pinMode(A0, OUTPUT);
+    pinMode(A1, OUTPUT);
+    pinMode(A2, OUTPUT);
+    pinMode(A3, OUTPUT);
+    pinMode(pin_point_left, OUTPUT);
+    pinMode(pin_point_right, OUTPUT);
+    
+    // кнопки
+    button1.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
+    button1.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
+    button1.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button1.setType(HIGH_PULL);
+    button1.setDirection(NORM_OPEN);
+
+    button2.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
+    button2.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
+    button2.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button2.setType(HIGH_PULL);
+    button2.setDirection(NORM_OPEN);
+
+    button3.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
+    button3.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
+    button3.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button3.setType(HIGH_PULL);
+    button3.setDirection(NORM_OPEN);
+
+    if (rtc.lostPower()) {  //  при потере питания
+        rtc.setTime(COMPILE_TIME);  // установить время компиляции
+    }
 }
 
 void loop() {
