@@ -21,7 +21,8 @@ int pin_point_right = 12;
 
 MicroDS3231 rtc;
 
-void setDigitBool(bool d0, bool d1, bool d2, bool d3) {
+void setDigitBool(bool d0, bool d1, bool d2, bool d3)
+{
     if (d0)
         digitalWrite(A0, HIGH);
     else
@@ -39,7 +40,8 @@ void setDigitBool(bool d0, bool d1, bool d2, bool d3) {
     else
         digitalWrite(A3, LOW);
 }
-void setDigit(int d) {
+void setDigit(int d)
+{
     switch (d)
     {
     case 0:
@@ -77,13 +79,15 @@ void setDigit(int d) {
         break;
     }
 }
-void setPoint(bool left, bool state) {
+void setPoint(bool left, bool state)
+{
     auto level = (state) ? HIGH : LOW;
     auto point_pin = (left) ? pin_point_left : pin_point_right;
     digitalWrite(point_pin, level);
 }
 
-void turnLamp(int n, int digit, bool left_point, bool right_point) {
+void turnLamp(int n, int digit, bool left_point, bool right_point)
+{
     int lamp = pin_digits[n];
 
     digitalWrite(lamp, HIGH);
@@ -99,8 +103,10 @@ void turnLamp(int n, int digit, bool left_point, bool right_point) {
     digitalWrite(lamp, LOW);
 }
 
-void setup() {
-    for (int i = 0; i < 4; i++) {
+void setup()
+{
+    for (int i = 0; i < 4; i++)
+    {
         pinMode(pin_digits[i], OUTPUT);
         digitalWrite(pin_digits[i], LOW);
     }
@@ -117,34 +123,98 @@ void setup() {
     digitalWrite(A3, LOW);
     digitalWrite(pin_point_left, LOW);
     digitalWrite(pin_point_right, LOW);
-    
+
     // кнопки
-    button_set.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button_set.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button_set.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button_set.setDebounce(50);      // настройка антидребезга (по умолчанию 80 мс)
+    button_set.setTimeout(700);      // настройка таймаута на удержание (по умолчанию 500 мс)
+    button_set.setClickTimeout(600); // настройка таймаута между кликами (по умолчанию 300 мс)
     button_set.setType(HIGH_PULL);
     button_set.setDirection(NORM_OPEN);
 
-    button_up.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button_up.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button_up.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button_up.setDebounce(50);      // настройка антидребезга (по умолчанию 80 мс)
+    button_up.setTimeout(700);      // настройка таймаута на удержание (по умолчанию 500 мс)
+    button_up.setClickTimeout(600); // настройка таймаута между кликами (по умолчанию 300 мс)
     button_up.setType(HIGH_PULL);
     button_up.setDirection(NORM_OPEN);
 
-    button_next.setDebounce(50);        // настройка антидребезга (по умолчанию 80 мс)
-    button_next.setTimeout(700);        // настройка таймаута на удержание (по умолчанию 500 мс)
-    button_next.setClickTimeout(600);   // настройка таймаута между кликами (по умолчанию 300 мс)
+    button_next.setDebounce(50);      // настройка антидребезга (по умолчанию 80 мс)
+    button_next.setTimeout(700);      // настройка таймаута на удержание (по умолчанию 500 мс)
+    button_next.setClickTimeout(600); // настройка таймаута между кликами (по умолчанию 300 мс)
     button_next.setType(HIGH_PULL);
     button_next.setDirection(NORM_OPEN);
 
-    if (rtc.lostPower()) {  //  при потере питания
-        rtc.setTime(COMPILE_TIME);  // установить время компиляции
+    if (rtc.lostPower())
+    {                              //  при потере питания
+        rtc.setTime(COMPILE_TIME); // установить время компиляции
     }
 }
 
-void loop() {
-    turnLamp(0, 1, true, true);
-    turnLamp(1, 3, true, true);
-    turnLamp(2, 3, true, true);
-    turnLamp(3, 7, true, true);
+void anti_poisoning()
+{
+    for (int j = 0; j < 4; j++)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            turnLamp(j, i, true, true);
+        }
+    }
+}
+
+void updateButtons()
+{
+    button_set.tick();
+    button_up.tick();
+    button_next.tick();
+}
+void resetButtons()
+{
+    button_set.resetStates();
+    button_up.resetStates();
+    button_next.resetStates();
+}
+
+class State
+{
+private:
+public:
+    State() {}
+    ~State() {}
+    void set()
+    {
+        resetButtons();
+    }
+    virtual void update()
+    {
+        turnLamp(0, 0, true, true);
+        turnLamp(1, 0, true, true);
+        turnLamp(2, 0, true, true);
+        turnLamp(3, 0, true, true);
+    }
+};
+
+class ClockState : public State
+{
+private:
+public:
+    ClockState(){};
+    ~ClockState(){};
+    void update() override
+    {
+        auto hours = rtc.getHours();
+        auto minutes = rtc.getMinutes();
+        auto month = rtc.getMonth();
+        auto date = rtc.getDate();
+
+        turnLamp(0, hours / 10, true, true);
+        turnLamp(1, hours % 10, true, true);
+        turnLamp(2, minutes / 10, true, true);
+        turnLamp(3, minutes % 10, true, true);
+    }
+};
+
+State *currentState = new ClockState();
+void loop()
+{
+    updateButtons();
+    currentState->update();
 }
